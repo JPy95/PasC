@@ -6,7 +6,7 @@ if __name__ == "__main__":
 
    print("\n=>Lista de tokens:")
    token = lexer.proxToken()
-   while(token is not None and token.getNome() != Tag.EOF):
+   while token is not None and token.getNome() != Tag.EOF:
       print(token.toString(), "Linha: " + str(token.getLinha()) + " Coluna: " + str(token.getColuna()))
       token = lexer.proxToken()
 

@@ -19,6 +19,8 @@ class Tag(Enum):
    KW_NOT = 8
    KW_OR = 9
    KW_AND = 10
+   KW_NUM = 11
+   KW_CHAR = 12
 
    # Operadores 
    OP_EQ = 20
@@ -45,9 +47,7 @@ class Tag(Enum):
    ID = 50
 
    # Numeros
-   NUM = 60
    NUM_CONST = 61
 
    # Caracteres
-   CHAR = 70
-   CHAR_COST = 71
+   CHAR_CONST = 71

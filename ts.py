@@ -21,6 +21,8 @@ class TS:
       self.ts['not'] = Token(Tag.KW_NOT, 'not', 0, 0)
       self.ts['or'] = Token(Tag.KW_OR, 'or', 0, 0)
       self.ts['and'] = Token(Tag.KW_AND, 'and', 0, 0)
+      self.ts['num'] = Token(Tag.KW_NUM, 'num', 0, 0)
+      self.ts['char'] = Token(Tag.KW_CHAR, 'char', 0, 0)
 
    def getToken(self, lexema):
       token = self.ts.get(lexema)

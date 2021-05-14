@@ -40,7 +40,7 @@ class Lexer:
     lexema = ""
     c = '\u0000'
 
-    while(True):
+    while True:
       self.lookahead = self.file.read(1)
       c = self.lookahead.decode('ascii')
       
@@ -83,6 +83,14 @@ class Lexer:
           estado = 21
         elif c == '<':
           estado = 24
+        elif c == '"':
+          estado = 29
+        elif c.isalpha():
+          lexema += c
+          estado = 26
+        elif c.isdigit():
+          lexema += c
+          estado = 31
         else:
           self.sinalizaErroLexico("Caractere invalido [" + c + "] na linha " +
           str(self.n_line) + " e coluna " + str(self.n_column))
@@ -105,13 +113,16 @@ class Lexer:
       elif estado == 9:
         return Token(Tag.SMB_SEM, ";", self.n_line, self.n_column)
       elif estado == 10:
-        print(c)
-        if c in ['/','*']:
-          c = '\n'
-
-        self.retornaPonteiro()
-        return Token(Tag.OP_DIV, "/", self.n_line, self.n_column)
-
+        if c == '/':
+          estado = 12
+        elif c == '*':
+          estado = 35
+        else:
+          self.retornaPonteiro()
+          return Token(Tag.OP_DIV, "/", self.n_line, self.n_column)
+      elif estado == 12:
+        if c == '\n':
+          estado = 1 
       elif estado == 16:
         if c == '=':
           return Token(Tag.OP_EQ, "==", self.n_line, self.n_column)
@@ -137,8 +148,40 @@ class Lexer:
 
         self.retornaPonteiro()
         return Token(Tag.OP_LT, "<", self.n_line, self.n_column)
-      
+      elif estado == 26:
+        if(c.isalnum()):
+          lexema += c
+        else:
+          self.retornaPonteiro()
+          token = self.ts.getToken(lexema)
+          if(token is None):
+            token = Token(Tag.ID, lexema, self.n_line, self.n_column)
+            self.ts.addToken(lexema, token)
+          else:
+            token.linha = self.n_line
+            token.coluna = self.n_column
 
+          return token
+      elif estado == 29:
+        if c != '"':
+          lexema += c
+        else:
+          return Token(Tag.CHAR_CONST, lexema, self.n_line, self.n_column)
+      elif estado == 31:
+        if(c.isdigit()):
+          lexema += c  
+        elif c == '.':
+          lexema += c   
+        else:
+          self.retornaPonteiro()
+          return Token(Tag.NUM_CONST, lexema, self.n_line, self.n_column)
+      elif estado == 35:
+        if c == '*':
+          estado = 36
+      elif estado == 36:
+        if c == '/':
+          estado = 1
+        
 
 
 
