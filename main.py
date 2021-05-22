@@ -9,7 +9,8 @@ if __name__ == "__main__":
    while token is not None and token.getNome() != Tag.EOF:
       print(token.toString(), "Linha: " + str(token.getLinha()) + " Coluna: " + str(token.getColuna()))
       token = lexer.proxToken()
-
+   if token is not None:
+      print(token.toString(), "Linha: " + str(token.getLinha()) + " Coluna: " + str(token.getColuna()))
    print("\n=>Tabela de simbolos:")
    lexer.printTS()
    lexer.closeFile()
