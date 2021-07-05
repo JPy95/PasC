@@ -7,7 +7,7 @@ if __name__ == "__main__":
     parser = AnalisadorParser(lexer)
 
     parser.prog()
-    parser.lexer.closeFile()
+    parser.lexer.closeFile
 
     print("\n=>Tabela de simbolos:")
     lexer.printTS()
