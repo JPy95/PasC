@@ -170,7 +170,9 @@ class AnalisadorParser:
         self.termLinha()
 
     def simpleExprLinha(self):
-        pass
+        self.relop()
+        self.term()
+        self.simpleExprLinha()
 
     def factorB(self):
         self.factorA()
@@ -191,4 +193,54 @@ class AnalisadorParser:
 
     def expressionLinha(self):
         if self.conferirToken([Tag.KW_OR, Tag.KW_AND]):
-            
+            self.logop()
+            self.simpleExpr()
+            self.expressionLinha()
+
+    def logop(self):
+        if self.conferirToken([Tag.KW_OR, Tag.KW_AND]):
+            self.advance()
+        else:
+            self.sinalizaErroSintatico("Esperado 'or' ou 'and'")
+
+    def factor(self):
+        if self.eat(Tag.ID):
+            pass
+        elif self.token == Tag.SMB_OPA:
+            self.eat(Tag.SMB_OPA)
+            self.expression()
+            self.eat(Tag.SMB_CPA)
+        elif self.conferirToken([Tag.KW_NUM, Tag.KW_NUM]):
+            self.constant()
+        else:
+            self.sinalizaErroSintatico("Fator inválido")
+
+    def factorA(self):
+        self.eat(Tag.KW_NOT)
+        self.factor()
+
+    def constant(self):
+        if self.conferirToken([Tag.NUM_CONST or Tag.CHAR_CONST]):
+            self.advance()
+        else:
+            self.sinalizaErroSintatico("Constante esperada'")
+
+    def factorBLinha(self):
+        if self.conferirToken([Tag.OP_DIV, Tag.OP_MUL]):
+            self.mulop()
+            self.factorA()
+            self.factorBLinha()
+
+    def mulop(self):
+        if self.conferirToken([Tag.OP_MUL, Tag.OP_DIV]):
+            self.advance()
+        else:
+            self.sinalizaErroSintatico("Operador inválido, utilize * ou /")
+
+    def relop(self):
+        if self.conferirToken([Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ]):
+            self.advance()
+        else:
+            self.sinalizaErroSintatico("Aguardando operador")
+
+
