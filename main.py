@@ -3,7 +3,7 @@ from lexer import Lexer
 from analisadorParser import AnalisadorParser
 
 if __name__ == "__main__":
-    lexer = Lexer('prog.txt')
+    lexer = Lexer('teste.pasc')
     parser = AnalisadorParser(lexer)
 
     parser.prog()

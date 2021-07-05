@@ -6,17 +6,17 @@ Programa Teste
 
 program P1
    num x, y, z;
-   char k;
+   char k; 
 {
    write "Teste para o Lexer";
-
+   
    read z;
    
    while(not(z != 0)) {
       write "Z = 0";
       z = z + 1;
    };
-
+   
    y = Z;
    x = 10.123 * y;
    k = "g";
@@ -29,7 +29,7 @@ program P1
          write "OK";
       }
       else {
-         write k;
+         write k; 
       }; /** outro comentario **/
    };
 } // Fim

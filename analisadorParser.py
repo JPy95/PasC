@@ -37,34 +37,28 @@ class AnalisadorParser:
 
     # verifica token esperado t
     def eat(self, t):
-        if (self.token.getNome() == t):
+        if self.token.getNome() == t:
             self.advance()
             return True
         else:
+            self.sinalizaErroSintatico("token esperado " + str(t))
             return False
 
     def prog(self):
-        if (not self.eat(Tag.KW_PROGRAM)):
-            self.sinalizaErroSintatico("Esperado 'program'")
-        if (not self.eat(Tag.ID)):
-            self.sinalizaErroSintatico("Esperando 'identificador'")
+        self.eat(Tag.KW_PROGRAM)
+        self.eat(Tag.ID)
         self.body()
 
     def body(self):
         self.declList()
-
-        if not self.eat(Tag.SMB_OBC):
-            self.sinalizaErroSintatico("Esperado '{'")
-
+        self.eat(Tag.SMB_OBC)
         self.stmtList()
-
-        if not self.eat(Tag.SMB_CBC):
-            self.sinalizaErroSintatico("Esperado '}'")
+        self.eat(Tag.SMB_CBC)
 
     def declList(self):
         if self.token.getNome() == Tag.KW_NUM or self.token.getNome() == Tag.KW_CHAR:
             self.decl()
-            self.sinalizaErroSintatico("Esperado ';'")
+            self.eat(Tag.SMB_SEM)
             self.declList()
 
     def stmtList(self):
@@ -75,43 +69,38 @@ class AnalisadorParser:
         self.idList()
 
     def type(self):
-        if self.eat(Tag.KW_NUM):
-            pass
-        if self.eat(Tag.KW_CHAR):
-            pass
+        if self.conferirToken([Tag.KW_NUM]):
+            self.advance()
+        elif self.conferirToken([Tag.KW_CHAR]):
+            self.advance()
         else:
             self.sinalizaErroSintatico("Aguardando 'num' ou 'char'")
 
     def idList(self):
-        if (not self.eat(Tag.ID)):
-            self.sinalizaErroSintatico("Iddentificador inesperado")
+        self.eat(Tag.ID)
         self.idListLinha()
 
     def idListLinha(self):
-        if self.eat(Tag.SMB_COM):
+        if self.conferirToken([Tag.SMB_COM]):
+            self.advance()
             self.idList()
-        elif (self.token.getNome() == Tag.SMB_SEM):
-            return
-        else:
-            self.sinalizaErroSintatico("Esperado ',' ou ';'")
 
     def stmtList(self):
-        if (
-                self.token.getNome() == Tag.ID or self.token.getNome() == Tag.KW_IF or self.token.getNome() == Tag.KW_READ or self.token.getNome() == Tag.KW_WHILE or self.token.getNome() == Tag.KW_WRITE):
+        if self.token.getNome() == Tag.ID or self.token.getNome() == Tag.KW_IF or self.token.getNome() == Tag.KW_READ or self.token.getNome() == Tag.KW_WHILE or self.token.getNome() == Tag.KW_WRITE:
             self.stmt()
             self.eat(Tag.SMB_SEM)
             self.stmtList()
 
     def stmt(self):
-        if (self.token.getNome() == Tag.ID):
+        if self.token.getNome() == Tag.ID:
             self.assignStmt()
-        elif (self.token.getNome() == Tag.KW_IF):
+        elif self.token.getNome() == Tag.KW_IF:
             self.ifStmt()
-        elif (self.token.getNome() == Tag.KW_WHILE):
+        elif self.token.getNome() == Tag.KW_WHILE:
             self.whileStmt()
-        elif (self.token.getNome() == Tag.KW_READ):
+        elif self.token.getNome() == Tag.KW_READ:
             self.readStmt()
-        elif (self.token.getNome() == Tag.KW_WRITE):
+        elif self.token.getNome() == Tag.KW_WRITE:
             self.writeStmt()
         else:
             self.sinalizaErroSintatico("Comando inválido'")
@@ -170,9 +159,10 @@ class AnalisadorParser:
         self.termLinha()
 
     def simpleExprLinha(self):
-        self.relop()
-        self.term()
-        self.simpleExprLinha()
+        if self.conferirToken([Tag.OP_EQ, Tag.OP_GT, Tag.OP_GE, Tag.OP_LT,Tag.OP_LE,Tag.OP_NE]):
+            self.relop()
+            self.term()
+            self.simpleExprLinha()
 
     def factorB(self):
         self.factorA()
@@ -184,18 +174,17 @@ class AnalisadorParser:
             self.factorB()
             self.termLinha()
 
-    def addOP(self):
-        self.eat(Tag.OP_AD)
-        self.eat(Tag.OP_MIN)
-
-    def conferirToken(self, lista):
-        return self.token.getNome() in lista
-
     def expressionLinha(self):
         if self.conferirToken([Tag.KW_OR, Tag.KW_AND]):
             self.logop()
             self.simpleExpr()
             self.expressionLinha()
+
+    def addOP(self):
+        if self.conferirToken([Tag.OP_AD, Tag.OP_MIN]):
+            self.advance()
+        else:
+            self.sinalizaErroSintatico("Operação inválida")
 
     def logop(self):
         if self.conferirToken([Tag.KW_OR, Tag.KW_AND]):
@@ -204,23 +193,24 @@ class AnalisadorParser:
             self.sinalizaErroSintatico("Esperado 'or' ou 'and'")
 
     def factor(self):
-        if self.eat(Tag.ID):
-            pass
-        elif self.token == Tag.SMB_OPA:
+        if self.conferirToken([Tag.ID]):
+            self.advance()
+        elif self.conferirToken([Tag.SMB_OPA]):
             self.eat(Tag.SMB_OPA)
             self.expression()
             self.eat(Tag.SMB_CPA)
-        elif self.conferirToken([Tag.KW_NUM, Tag.KW_NUM]):
+        elif self.conferirToken([Tag.NUM_CONST, Tag.CHAR_CONST]):
             self.constant()
         else:
             self.sinalizaErroSintatico("Fator inválido")
 
     def factorA(self):
-        self.eat(Tag.KW_NOT)
+        if self.conferirToken([Tag.KW_NOT]):
+            self.advance()
         self.factor()
 
     def constant(self):
-        if self.conferirToken([Tag.NUM_CONST or Tag.CHAR_CONST]):
+        if self.conferirToken([Tag.NUM_CONST, Tag.CHAR_CONST]):
             self.advance()
         else:
             self.sinalizaErroSintatico("Constante esperada'")
@@ -238,9 +228,12 @@ class AnalisadorParser:
             self.sinalizaErroSintatico("Operador inválido, utilize * ou /")
 
     def relop(self):
-        if self.conferirToken([Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ, Tag.OP_EQ]):
+        if self.conferirToken([Tag.OP_EQ, Tag.OP_GT, Tag.OP_GE, Tag.OP_LT, Tag.OP_LE, Tag.OP_NE]):
             self.advance()
         else:
             self.sinalizaErroSintatico("Aguardando operador")
+
+    def conferirToken(self, lista):
+        return self.token.getNome() in lista
 
 
