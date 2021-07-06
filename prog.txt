@@ -1,15 +1,5 @@
-+ - { } ( ) , ; / // joao
-/*
->= > <= <
-program
-if
-joao
-100
-100.14
-num
-read
-char
-***
-asdasda
+Teste
+"Teste"/*
+sadasd
 */
-"21321212"
+if
